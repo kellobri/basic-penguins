@@ -1,0 +1,140 @@
+---
+title: "Facetted Scatterplots with Marginal Histograms"
+description: |
+  Comparison of techniques for generating facetted scatterplots with marginal histograms using the 'palmerpenguins' dataset
+author:
+  - name: Kelly 
+    url: https://medium.com/rstudio-connect-digest
+    affiliation: RStudio
+    affiliation_url: https://rstudio.com/
+date: "`r Sys.Date()`"
+output: 
+  distill::distill_article:
+    code_folding: true
+---
+
+Various example solutions pulled from this [StackOverflow post](https://stackoverflow.com/questions/8545035/scatterplot-with-marginal-histograms-in-ggplot2) using the [palmerpenguins](https://github.com/allisonhorst/palmerpenguins) dataset instead of the standard iris.
+
+## ggpubr: 'ggplot2' Based Publication Ready Plots
+
+- Documentation [Link](https://rpkgs.datanovia.com/ggpubr/index.html)
+
+### Example 1: `ggscatter` + `cowplot`
+
+```{r}
+library(palmerpenguins)
+library(ggpubr)
+library(cowplot)
+
+sp <- ggscatter(penguins, x = "bill_length_mm", y = "bill_depth_mm",
+            color = "species", palette = c("darkorange", "purple", "cyan4"),
+            size = 3, alpha = 0.6)+
+border()                                         
+# Marginal density plot of x (top panel) and y (right panel)
+xplot <- ggdensity(penguins, "bill_length_mm", fill = "species",
+               palette = c("darkorange", "purple", "cyan4"))
+yplot <- ggdensity(penguins, "bill_depth_mm", fill = "species", 
+               palette = c("darkorange", "purple", "cyan4"))+
+rotate()
+
+# Cleaning the plots
+sp <- sp + rremove("legend")
+yplot <- yplot + clean_theme() + rremove("legend") 
+xplot <- xplot + clean_theme() + rremove("legend")
+
+# Arranging the plot using cowplot
+plot_grid(xplot, NULL, sp, yplot, ncol = 2, align = "hv", 
+      rel_widths = c(2, 1), rel_heights = c(1, 2))
+```
+### Example 2: `ggscatterhist`
+
+```{r}
+library(ggpubr)
+
+ggscatterhist(
+  penguins, x = "bill_length_mm", y = "bill_depth_mm",
+  palette = c("darkorange", "purple", "cyan4"),
+  color = "species",
+  margin.plot = "histogram",
+  margin.params = list(fill = "species", color = "black", size = 0.2)
+)
+```
+
+## ggExtra: Add marginal histograms to ggplot2
+
+- Documentation [Link](https://github.com/daattali/ggExtra)
+
+```{r}
+library(ggExtra)
+
+p = ggplot(penguins, aes(bill_length_mm, bill_depth_mm)) + geom_point(alpha=0.3)
+ggMarginal(p, type = "histogram")
+```
+
+## ggplot2 + cowplot
+
+```{r}
+library("ggplot2")
+library("cowplot")
+
+# Set up scatterplot
+scatterplot <- ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point(size = 3, alpha = 0.6) +
+  guides(color = FALSE) +
+  theme(plot.margin = margin())
+
+
+# Define marginal histogram
+marginal_distribution <- function(x, var, group) {
+  ggplot(x, aes_string(x = var, fill = group)) +
+    geom_histogram(bins = 30, alpha = 0.4, position = "identity") +
+    # geom_density(alpha = 0.4, size = 0.1) +
+    guides(fill = FALSE) +
+    theme_void() +
+    theme(plot.margin = margin())
+}
+
+# Set up marginal histograms
+x_hist <- marginal_distribution(penguins, "bill_length_mm", "species")
+y_hist <- marginal_distribution(penguins, "bill_depth_mm", "species") +
+  coord_flip()
+
+# Align histograms with scatterplot
+aligned_x_hist <- align_plots(x_hist, scatterplot, align = "v")[[1]]
+aligned_y_hist <- align_plots(y_hist, scatterplot, align = "h")[[1]]
+
+# Arrange plots
+plot_grid(
+  aligned_x_hist
+  , NULL
+  , scatterplot
+  , aligned_y_hist
+  , ncol = 2
+  , nrow = 2
+  , rel_heights = c(0.2, 1)
+  , rel_widths = c(1, 0.2)
+)
+```
+
+
+```{r}
+# Set up 2D-density plot
+contour_plot <- ggplot(penguins, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  stat_density_2d(aes(alpha = ..piece..)) +
+  guides(color = FALSE, alpha = FALSE) +
+  theme(plot.margin = margin())
+
+# Arrange plots
+plot_grid(
+  aligned_x_hist
+  , NULL
+  , contour_plot
+  , aligned_y_hist
+  , ncol = 2
+  , nrow = 2
+  , rel_heights = c(0.2, 1)
+  , rel_widths = c(1, 0.2)
+)
+```
+
+

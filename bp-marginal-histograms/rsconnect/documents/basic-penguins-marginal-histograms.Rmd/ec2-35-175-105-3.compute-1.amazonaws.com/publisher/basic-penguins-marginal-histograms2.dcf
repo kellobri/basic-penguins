@@ -1,0 +1,12 @@
+name: basic-penguins-marginal-histograms2
+title: basic-penguins-marginal-histograms
+username: publisher
+account: publisher
+server: ec2-35-175-105-3.compute-1.amazonaws.com
+hostUrl: http://ec2-35-175-105-3.compute-1.amazonaws.com:3939/__api__
+appId: 2
+bundleId: 2
+url: http://ec2-35-175-105-3.compute-1.amazonaws.com:3939/content/99c143b7-72fc-4476-804b-710474c86e40/
+when: 1617837548.90599
+asMultiple: FALSE
+asStatic: FALSE
