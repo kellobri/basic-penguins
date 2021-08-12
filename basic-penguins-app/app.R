@@ -19,7 +19,7 @@ ui <- fluidPage(
         theme = bslib::bs_theme(version = 4, bootswatch = "litera"),
         tabsetPanel(id = "tabs",
                     tabPanel("Cluster",
-                             titlePanel("Palmer Penguins k-means clustering"),
+                             titlePanel("Palmer Penguins k-means clustering 2021"),
                              sidebarPanel(width = 3,
                                  selectInput('xcol', 'X Variable', vars),
                                  selectInput('ycol', 'Y Variable', vars, selected = vars[[2]]),
